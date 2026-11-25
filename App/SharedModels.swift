@@ -21,20 +21,11 @@ struct TrackedDate: Identifiable, Codable, Equatable {
 }
 
 enum SharedStorage {
-    static let defaultSuiteName = "group.com.personal.daycounter.shared"
     private static let datesKey = "tracked_dates_v1"
     private static let selectedWidgetIdKey = "selected_widget_date_id_v1"
 
-    static var suiteName: String {
-        if let appGroups = Bundle.main.object(forInfoDictionaryKey: "AppGroups") as? [String],
-           let first = appGroups.first, !first.isEmpty {
-            return first
-        }
-        return defaultSuiteName
-    }
-
-    static var defaults: UserDefaults {
-        UserDefaults(suiteName: suiteName) ?? .standard
+    private static var defaults: UserDefaults {
+        .standard
     }
 
     static func loadDates() -> [TrackedDate] {

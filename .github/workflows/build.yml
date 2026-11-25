@@ -1,43 +1,42 @@
-name: DayCounter
-options:
-  bundleIdPrefix: com.personal.daycounter
-targets:
-  DayCounterApp:
-    type: application
-    platform: iOS
-    deploymentTarget: "18.0"
-    sources:
-      - App
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.personal.daycounter.app
-        INFOPLIST_FILE: App/Info.plist
-        CODE_SIGNING_ALLOWED: "NO"
-        GENERATE_INFOPLIST_FILE: "NO"
-    dependencies:
-      - target: DaysWidgetExtension
-    entitlements:
-      path: App/App.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.personal.daycounter.shared
+name: Build iOS IPA
 
-  DaysWidgetExtension:
-    type: app-extension
-    platform: iOS
-    deploymentTarget: "18.0"
-    sources:
-      - Widget
-      - path: App/SharedModels.swift
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.personal.daycounter.app.widget
-        INFOPLIST_FILE: Widget/Info.plist
-        CODE_SIGNING_ALLOWED: "NO"
-        GENERATE_INFOPLIST_FILE: "NO"
-        INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
-    entitlements:
-      path: Widget/Widget.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.personal.daycounter.shared
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build App & Widget
+        run: |
+          xcodebuild \
+            -project DayCounter.xcodeproj \
+            -scheme DayCounterApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/DayCounterApp.app Payload/
+          zip -r DayCounter.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayCounter-IPA
+          path: DayCounter.ipa

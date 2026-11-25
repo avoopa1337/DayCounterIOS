@@ -16,11 +16,6 @@ targets:
         GENERATE_INFOPLIST_FILE: "NO"
     dependencies:
       - target: DaysWidgetExtension
-    entitlements:
-      path: App/App.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.personal.daycounter.shared
 
   DaysWidgetExtension:
     type: app-extension
@@ -36,8 +31,3 @@ targets:
         CODE_SIGNING_ALLOWED: "NO"
         GENERATE_INFOPLIST_FILE: "NO"
         INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
-    entitlements:
-      path: Widget/Widget.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.personal.daycounter.shared
